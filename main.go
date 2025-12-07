@@ -17,3 +17,14 @@ func NewWaterSystem() *WaterSystem {
 		containerIDs: make(map[int]bool),
 	}
 }
+
+func (ws *WaterSystem) AddContainer(id int) {
+	ws.mu.Lock()
+	defer ws.mu.Unlock()
+
+	if _, exists := ws.containerIDs[id]; !exists {
+		ws.containerIDs[id] = true
+		ws.adj[id] = make(map[int]bool)
+		ws.levels[id] = 0.0
+	}
+}
