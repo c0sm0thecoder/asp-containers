@@ -125,25 +125,41 @@ func main() {
 
 	// Setup 4 containers
 	for i := 1; i <= 4; i++ {
-		ws.AddContainer(i)
+		if err := ws.AddContainer(i); err != nil {
+			fmt.Println("Error:", err)
+		}
 	}
 
 	// Add 10L water to the container 1
-	ws.AddWater(1, 10.0)
+	if err := ws.AddWater(1, 10.0); err != nil {
+		fmt.Println("Error:", err)
+	}
 	// Connect containers 1 and 2
-	ws.Connect(1, 2)
+	if err := ws.Connect(1, 2); err != nil {
+		fmt.Println("Error:", err)
+	}
 
 	// Connect containers 3 and 4
-	ws.Connect(3, 4)
+	if err := ws.Connect(3, 4); err != nil {
+		fmt.Println("Error:", err)
+	}
 	// Add 20L water to the container 3
-	ws.AddWater(3, 20.0)
+	if err := ws.AddWater(3, 20.0); err != nil {
+		fmt.Println("Error:", err)
+	}
 
 	// Connect the two groups we have
-	ws.Connect(2, 3)
+	if err := ws.Connect(2, 3); err != nil {
+		fmt.Println("Error:", err)
+	}
 
 	// Disconnect the groups
-	ws.Disconnect(2, 3)
+	if err := ws.Disconnect(2, 3); err != nil {
+		fmt.Println("Error:", err)
+	}
 
 	// Add water to the group 1-2
-	ws.AddWater(1, 5.0)
+	if err := ws.AddWater(1, 5.0); err != nil {
+		fmt.Println("Error:", err)
+	}
 }
