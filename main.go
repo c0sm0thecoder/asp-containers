@@ -75,3 +75,33 @@ func (ws *WaterSystem) getComponent(startNode int) []int {
 
 	return component
 }
+
+func (ws *WaterSystem) Connect(a, b int) error {
+	ws.mu.Lock()
+	defer ws.mu.Unlock()
+
+	if !ws.containerIDs[a] || !ws.containerIDs[b] {
+		return fmt.Errorf("one or both containers do not exist")
+	}
+
+	if ws.adj[a][b] {
+		return fmt.Errorf("containers are already connected")
+	}
+
+	ws.adj[a][b] = true
+	ws.adj[a][b] = true
+
+	group := ws.getComponent(a)
+
+	totalWater := 0.0
+	for _, id := range group {
+		totalWater += ws.levels[id]
+	}
+
+	newLevel := totalWater / float64(len(group))
+	for _, id := range group {
+		ws.levels[id] = newLevel
+	}
+
+	return nil
+}
