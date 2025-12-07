@@ -105,3 +105,17 @@ func (ws *WaterSystem) Connect(a, b int) error {
 
 	return nil
 }
+
+func (ws *WaterSystem) Disconnect(a, b int) error {
+	ws.mu.Lock()
+	defer ws.mu.Unlock()
+
+	if !ws.adj[a][b] {
+		return fmt.Errorf("containers are not connected")
+	}
+
+	delete(ws.adj[a], b)
+	delete(ws.adj[b], a)
+
+	return nil
+}
