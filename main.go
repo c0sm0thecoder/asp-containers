@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"sync"
 )
 
@@ -89,7 +90,7 @@ func (ws *WaterSystem) Connect(a, b int) error {
 	}
 
 	ws.adj[a][b] = true
-	ws.adj[a][b] = true
+	ws.adj[b][a] = true
 
 	group := ws.getComponent(a)
 
@@ -120,46 +121,98 @@ func (ws *WaterSystem) Disconnect(a, b int) error {
 	return nil
 }
 
+func (ws *WaterSystem) PrintStatus() {
+	fmt.Println("--------------------- Container Status --------------------")
+
+	ids := make([]int, 0, len(ws.containerIDs))
+	for id := range ws.containerIDs {
+		ids = append(ids, id)
+	}
+	sort.Ints(ids)
+
+	for _, id := range ids {
+		group := ws.getComponent(id)
+		fmt.Printf("Container %d: %.2fL (connected to: ", id, ws.levels[id])
+
+		neighbors := make([]int, 0, len(ws.adj[id]))
+		for neighbor := range ws.adj[id] {
+			neighbors = append(neighbors, neighbor)
+		}
+		sort.Ints(neighbors)
+
+		if len(neighbors) == 0 {
+			fmt.Print("none")
+		} else {
+			for i, neighbor := range neighbors {
+				if i > 0 {
+					fmt.Print(", ")
+				}
+				fmt.Printf("%d", neighbor)
+			}
+		}
+		fmt.Printf(") [group size: %d]\n", len(group))
+	}
+	fmt.Println("-----------------------------------------------------------")
+}
+
 func main() {
 	ws := NewWaterSystem()
 
 	// Setup 4 containers
+	fmt.Println("\nSetting up 4 containers")
 	for i := 1; i <= 4; i++ {
 		if err := ws.AddContainer(i); err != nil {
 			fmt.Println("Error:", err)
 		}
 	}
+	ws.PrintStatus()
 
 	// Add 10L water to the container 1
+	fmt.Println("\nAdding 10L water to container 1")
 	if err := ws.AddWater(1, 10.0); err != nil {
 		fmt.Println("Error:", err)
 	}
+	ws.PrintStatus()
+
 	// Connect containers 1 and 2
+	fmt.Println("\nConnecting containers 1 and 2")
 	if err := ws.Connect(1, 2); err != nil {
 		fmt.Println("Error:", err)
 	}
+	ws.PrintStatus()
 
 	// Connect containers 3 and 4
+	fmt.Println("\nConnecting containers 3 and 4")
 	if err := ws.Connect(3, 4); err != nil {
 		fmt.Println("Error:", err)
 	}
+	ws.PrintStatus()
+
 	// Add 20L water to the container 3
+	fmt.Println("\nAdding 20L water to container 3")
 	if err := ws.AddWater(3, 20.0); err != nil {
 		fmt.Println("Error:", err)
 	}
+	ws.PrintStatus()
 
 	// Connect the two groups we have
+	fmt.Println("\nConnecting the two groups (2 and 3)")
 	if err := ws.Connect(2, 3); err != nil {
 		fmt.Println("Error:", err)
 	}
+	ws.PrintStatus()
 
 	// Disconnect the groups
+	fmt.Println("\nDisconnecting the groups (2 and 3)")
 	if err := ws.Disconnect(2, 3); err != nil {
 		fmt.Println("Error:", err)
 	}
+	ws.PrintStatus()
 
 	// Add water to the group 1-2
+	fmt.Println("\nAdding 5L water to group 1-2")
 	if err := ws.AddWater(1, 5.0); err != nil {
 		fmt.Println("Error:", err)
 	}
+	ws.PrintStatus()
 }
