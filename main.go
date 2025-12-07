@@ -119,3 +119,31 @@ func (ws *WaterSystem) Disconnect(a, b int) error {
 
 	return nil
 }
+
+func main() {
+	ws := NewWaterSystem()
+
+	// Setup 4 containers
+	for i := 1; i <= 4; i++ {
+		ws.AddContainer(i)
+	}
+
+	// Add 10L water to the container 1
+	ws.AddWater(1, 10.0)
+	// Connect containers 1 and 2
+	ws.Connect(1, 2)
+
+	// Connect containers 3 and 4
+	ws.Connect(3, 4)
+	// Add 20L water to the container 3
+	ws.AddWater(3, 20.0)
+
+	// Connect the two groups we have
+	ws.Connect(2, 3)
+
+	// Disconnect the groups
+	ws.Disconnect(2, 3)
+
+	// Add water to the group 1-2
+	ws.AddWater(1, 5.0)
+}
