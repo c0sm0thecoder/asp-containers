@@ -1,6 +1,9 @@
 package main
 
-import "sync"
+import (
+	"fmt"
+	"sync"
+)
 
 // Struct to build the container network
 type WaterSystem struct {
@@ -18,7 +21,7 @@ func NewWaterSystem() *WaterSystem {
 	}
 }
 
-func (ws *WaterSystem) AddContainer(id int) {
+func (ws *WaterSystem) AddContainer(id int) error {
 	ws.mu.Lock()
 	defer ws.mu.Unlock()
 
@@ -26,5 +29,49 @@ func (ws *WaterSystem) AddContainer(id int) {
 		ws.containerIDs[id] = true
 		ws.adj[id] = make(map[int]bool)
 		ws.levels[id] = 0.0
+		return nil
 	}
+
+	return fmt.Errorf("container with id %d already exists", id)
+}
+
+func (ws *WaterSystem) AddWater(id int, amount float64) error {
+	ws.mu.Lock()
+	defer ws.mu.Unlock()
+
+	if !ws.containerIDs[id] {
+		return fmt.Errorf("container with id %d does not exist", id)
+	}
+
+	group := ws.getComponent(id)
+	levelIncrease := amount / float64(len(group))
+
+	for _, memberID := range group {
+		ws.levels[memberID] += levelIncrease
+	}
+
+	return nil
+}
+
+func (ws *WaterSystem) getComponent(startNode int) []int {
+	// Do BFS to get all connected nodes to the startNode
+	visited := make(map[int]bool)
+	queue := []int{startNode}
+	visited[startNode] = true
+	component := []int{}
+
+	for len(queue) > 0 {
+		curr := queue[0]
+		queue = queue[1:]
+		component = append(component, curr)
+
+		for neighbor := range ws.adj[curr] {
+			if !visited[neighbor] {
+				visited[neighbor] = true
+				queue = append(queue, neighbor)
+			}
+		}
+	}
+
+	return component
 }
